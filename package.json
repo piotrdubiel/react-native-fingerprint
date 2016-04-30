@@ -1,0 +1,14 @@
+{
+  "name": "react-native-fingerprint",
+  "version": "0.0.1",
+  "description": "Use Android fingerprint sensor in ReactNative",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/piotrdubiel/react-native-fingerprint.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Piotrek Dubiel",
+  "license": "MIT"
+}
