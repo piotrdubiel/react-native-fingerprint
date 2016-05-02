@@ -1,18 +1,22 @@
 package io.reactnative.fingerprint;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.support.annotation.Nullable;
 import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
 import android.support.v4.os.CancellationSignal;
 import android.util.Log;
 
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -31,8 +35,11 @@ public class ReactNativeFingerprintManager extends FingerprintManagerCompat.Auth
     private Callback callback;
     private String KEY_NAME = "key";
     private KeyStore keyStore;
+    final private ReactContext context;
+    private boolean selfCancelled;
 
-    public ReactNativeFingerprintManager(Context context) {
+    public ReactNativeFingerprintManager(ReactContext context) {
+        this.context = context;
         fingerprintManager = FingerprintManagerCompat.from(context);
         try {
             keyStore = KeyStore.getInstance("AndroidKeyStore");
@@ -67,6 +74,7 @@ public class ReactNativeFingerprintManager extends FingerprintManagerCompat.Auth
 
     public void cancel() {
         if (cancellationSignal != null) {
+            selfCancelled = true;
             cancellationSignal.cancel();
             cancellationSignal = null;
         }
@@ -74,26 +82,42 @@ public class ReactNativeFingerprintManager extends FingerprintManagerCompat.Auth
 
     @Override
     public void onAuthenticationError(int errMsgId, CharSequence errString) {
-        Log.d("FINGERPRINT", errString.toString());
-        callback.onError();
+        Log.d("FINERR", errString.toString());
+        if (!selfCancelled) {
+            final WritableMap response = new WritableNativeMap();
+            response.putString("code", String.valueOf(errMsgId));
+            response.putString("message", errString.toString());
+            sendEvent("fingerprintError", response);
+        }
     }
 
     @Override
     public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
         super.onAuthenticationHelp(helpMsgId, helpString);
-        Log.d("FINGERPRINT", helpString.toString());
+        Log.d("FINHELP", helpString.toString());
+        final WritableMap response = new WritableNativeMap();
+        response.putString("code", String.valueOf(helpMsgId));
+        response.putString("message", helpString.toString());
+        sendEvent("fingerprintError", response);
     }
 
     @Override
     public void onAuthenticationSucceeded(FingerprintManagerCompat.AuthenticationResult result) {
-        Log.d("FINGERPRINT", result.toString());
-        callback.onAuthenticated();
+        Log.d("FINSUC", result.toString());
+//        callback.onAuthenticated();
+        final WritableMap response = new WritableNativeMap();
+        response.putString("result", "OK");
+        sendEvent("fingerprintAuthorized", response);
     }
 
     @Override
     public void onAuthenticationFailed() {
-        Log.d("FINGERPRINT", "FAILED");
-        callback.onError();
+        Log.d("FINFAIL", "FAILED");
+//        callback.onError();
+//        cancel();
+        final WritableMap response = new WritableNativeMap();
+        response.putString("message", "Fingerprint not recognized. Try again.");
+        sendEvent("fingerprintError", response);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -106,6 +130,35 @@ public class ReactNativeFingerprintManager extends FingerprintManagerCompat.Auth
 
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher;
+    }
+
+    public void init() {
+        if (!isFingerprintAvailable()) {
+            final WritableMap response = new WritableNativeMap();
+            response.putString("message", "fingerprint sensor not available");
+            sendEvent("fingerprintError", response);
+        }
+        selfCancelled = false;
+        cancellationSignal = new CancellationSignal();
+        try {
+            fingerprintManager.authenticate(
+                    new FingerprintManagerCompat.CryptoObject(initCipher()),
+                    0, cancellationSignal, this, null);
+        } catch (NoSuchPaddingException
+                | NoSuchAlgorithmException
+                | UnrecoverableKeyException
+                | InvalidKeyException
+                | IOException
+                | KeyStoreException
+                | CertificateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendEvent(String eventName,
+                           @Nullable WritableMap params) {
+        context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
     }
 
     public interface Callback {
