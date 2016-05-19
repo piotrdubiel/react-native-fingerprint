@@ -1,7 +1,7 @@
-import React, {
+import {
   NativeModules
-} from 'react-native';
+} from 'react-native'
 
 
-const Fingerprint = NativeModules.Fingerprint;
-export default Fingerprint;
+const Fingerprint = NativeModules.Fingerprint
+export default Fingerprint

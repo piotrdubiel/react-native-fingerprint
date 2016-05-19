@@ -1,7 +1,10 @@
 package io.reactnative.fingerprint;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -19,6 +22,8 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 @SuppressWarnings("unused")
@@ -92,6 +97,12 @@ public class ReactNativeFingerprintModule extends ReactContextBaseJavaModule imp
             e.printStackTrace();
             promise.reject(e);
         }
+    }
+
+    @ReactMethod
+    public void encrypt(String data, final Promise promise) {
+        isListening = true;
+        fingerprintManager.init();
     }
 
     @ReactMethod

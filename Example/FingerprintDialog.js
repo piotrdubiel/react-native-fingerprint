@@ -2,40 +2,39 @@ import React, {
   Animated,
   Component,
   Image,
-  PixelRatio,
   StyleSheet,
   Text,
   TouchableNativeFeedback,
-  View,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+  View
+} from 'react-native'
+import Icon from 'react-native-vector-icons/MaterialIcons'
 
 
 export default
 class FingerprintDialog extends Component {
   constructor() {
-    super();
+    super()
     this.state = {
       top: new Animated.Value(-1000),
       opacity: new Animated.Value(0)
-    };
+    }
   }
 
   componentDidMount() {
     Animated.sequence([
       Animated.timing(this.state.opacity, {duration: 300, toValue: 0.7}),
       Animated.timing(this.state.top, {duration: 300, toValue: 0})
-    ]).start();
+    ]).start()
   }
 
   render() {
-    const {isAuthorized, message} = this.props;
-    let icon = <Icon size={30} name='fingerprint' color='#009688'/>
+    const {isAuthorized, message} = this.props
+    let icon = <Icon size={30} name="fingerprint" color="#009688"/>
     if (isAuthorized) {
-      icon = <Icon size={30} name='check-circle' color='#009688'/>;
+      icon = <Icon size={30} name="lock-open" color="#009688"/>
     }
     else if (isAuthorized === false) {
-      icon = <Icon size={30} name='error' color='#f4511e'/>;
+      icon = <Icon size={30} name="error" color="#f4511e"/>
     }
 
     return (
@@ -62,7 +61,7 @@ class FingerprintDialog extends Component {
           </View>
         </View>
       </Animated.View>
-    );
+    )
   }
 }
 
@@ -74,7 +73,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     backgroundColor: 'black',
-    opacity: 0,
+    opacity: 0
   },
   dialogContainer: {
     position: 'absolute',
@@ -82,34 +81,34 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   dialog: {
     backgroundColor: 'white',
     padding: 20,
     width: 300,
     paddingBottom: 10,
-    borderRadius: 2,
+    borderRadius: 2
   },
   title: {
     fontWeight: '500',
     fontSize: 20,
     color: '#222',
-    marginBottom: 16,
+    marginBottom: 16
   },
   description: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: '400'
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 16
   },
   status: {
     marginHorizontal: 12,
     color: '#BFBFBF',
-    flex: 1,
+    flex: 1
   },
   buttons: {
     flex: 1,
@@ -120,6 +119,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 10,
     fontWeight: '500',
-    color: '#009688',
+    color: '#009688'
   }
 })

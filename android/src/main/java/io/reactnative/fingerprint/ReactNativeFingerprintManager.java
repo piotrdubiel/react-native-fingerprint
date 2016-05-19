@@ -46,7 +46,6 @@ public class ReactNativeFingerprintManager extends FingerprintManagerCompat.Auth
         } catch (KeyStoreException e) {
             e.printStackTrace();
         }
-
     }
 
     public boolean hasEnrolledFingerprints() {
@@ -180,8 +179,6 @@ public class ReactNativeFingerprintManager extends FingerprintManagerCompat.Auth
                     KeyProperties.PURPOSE_ENCRYPT |
                             KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                    // Require the user to authenticate with a fingerprint to authorize every use
-                    // of the key
                     .setUserAuthenticationRequired(true)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
                     .build());
