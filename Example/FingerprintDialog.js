@@ -1,7 +1,6 @@
 import React, {
   Animated,
   Component,
-  Image,
   StyleSheet,
   Text,
   TouchableNativeFeedback,
